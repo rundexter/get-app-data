@@ -1,3 +1,6 @@
+var _ = require( 'lodash' );
+var q = require( 'q' );
+
 module.exports = {
     /**
      * The main entry point for the Dexter module
@@ -6,8 +9,24 @@ module.exports = {
      * @param {AppData} dexter Container for all data used in this workflow.
      */
     run: function(step, dexter) {
-        var results = { foo: 'bar' };
-        //Call this.complete with the module's output.  If there's an error, call this.fail(message) instead.
-        this.complete(results);
+        var keys = step.input( 'key' ).toArray();
+        var defs = step.input( 'default' ).toArray();
+
+        var self = this;
+
+        var results = [ ];
+        _.zipWith( keys, defs, function( k, d ) { return { key: k, def: d } })
+            .forEach( function( item ) {
+                results.push( self.storage.global( item.key ) );
+            } );
+
+        var ret = [ ];
+        q.all( results )
+            .then( function( res ) {
+                res.forEach( function( val, i ) { ret.push( { value: ( val || defs[ i ] ) } ) } );
+                return self.complete( ret );
+            } )
+            .fail( function( err ) { return self.fail( err ) } );
+
     }
 };
