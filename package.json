@@ -1,7 +1,7 @@
 {
   "name": "get-app-data",
   "version": "0.0.1",
-  "description": "",
+  "description": "Store global data for this application",
   "main": "index.js",
   "author": "Run Dexter, Inc",
   "license": "MIT",
